@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
+    @State private var score = 0
 
     var body: some View {
         NavigationView {
@@ -29,12 +30,17 @@ struct ContentView: View {
                     Image(systemName: "\($0.count).circle")
                     Text($0)
                 }
+                Text("Score: \(score)")
             }
             .navigationBarTitle(rootWord)
+
             .onAppear(perform: startGame)
             .alert(isPresented: $showingError) {
                 Alert(title: Text(errorTitle), message: Text(errorMessage), dismissButton: .default(Text("OK")))
             }
+            .navigationBarItems(trailing:
+                                    Button("Next", action: startGame)
+            )
         }
     }
 
@@ -58,9 +64,20 @@ struct ContentView: View {
 
         guard isReal(word: answer) else {
             wordError(title: "Word not possible", message: "That isn't a real word")
-            return 
+            return
         }
 
+        guard answer != rootWord else {
+            wordError(title: "Root word", message: "That is the same as the root word.")
+            return
+        }
+
+        guard 2 < answer.count else {
+            wordError(title: "Too short", message: "Answers must be longer than 2 letters")
+            return
+        }
+
+        score += answer.count
         usedWords.insert(answer, at: 0)
         newWord = ""
     }
